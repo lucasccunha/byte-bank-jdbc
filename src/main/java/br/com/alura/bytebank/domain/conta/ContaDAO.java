@@ -22,7 +22,7 @@ public class ContaDAO {
 
     public void salvar(DadosAberturaConta dadosDaConta) {
         var cliente = new Cliente(dadosDaConta.dadosCliente());
-        var conta = new Conta(dadosDaConta.numero(), cliente);
+        var conta = new Conta(dadosDaConta.numero(), BigDecimal.ZERO, cliente);
 
         String sql = "INSERT INTO conta (numero, saldo, cliente_nome, cliente_cpf,cliente_email)" + "VALUES (?, ?, ?, ?, ?)";
 
@@ -58,10 +58,11 @@ public class ContaDAO {
                 String nome = rs.getString(3);
                 String cpf = rs.getString(4);
                 String email = rs.getString(5);
-                DadosCadastroCliente dadosCliente = new DadosCadastroCliente(nome, cpf, email);
+                DadosCadastroCliente dadosCliente =
+                        new DadosCadastroCliente(nome, cpf, email);
                 Cliente cliente = new Cliente(dadosCliente);
 
-                contas.add(new Conta(numero, cliente));
+                contas.add(new Conta(numero,saldo, cliente));
             }
 
         } catch (SQLException e) {
@@ -85,7 +86,7 @@ public class ContaDAO {
                     String email = rs.getString(5);
                     DadosCadastroCliente dadosCliente = new DadosCadastroCliente(nome, cpf, email);
                     Cliente cliente = new Cliente(dadosCliente);
-                    return new Conta(numeroRecuperado, cliente);
+                    return new Conta(numeroRecuperado,saldo, cliente);
                 } else {
                     throw new RegraDeNegocioException("Não existe conta cadastrada com esse número!");
                 }
@@ -95,6 +96,21 @@ public class ContaDAO {
         }
     }
 
+    public void alterar(Integer numero, BigDecimal valor) {
+        PreparedStatement ps;
+        String sql = "UPDATE conta SET saldo = ? WHERE numero = ?";
 
 
+    try {
+        ps = conn.prepareStatement(sql);
+        ps.setBigDecimal(1, valor);
+        ps.setInt(2, numero);
+
+        ps.execute();
+        ps.close();
+        conn.close();
+    } catch (SQLException e) {
+        throw new RuntimeException(e);
+    }
+}
 }
