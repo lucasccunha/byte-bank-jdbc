@@ -63,6 +63,11 @@ public class ContaService {
         alterar(conta.getNumero(),novoValor);
     }
 
+    public void realizarTransferencia (Integer numeroDaContaOrigem, Integer numeroDaContaDestino, BigDecimal valor){
+        this.realizarSaque(numeroDaContaOrigem, valor);
+        this.realizarDeposito(numeroDaContaDestino, valor);
+    }
+
     public void encerrar(Integer numeroDaConta) {
         var conta = listarContaPorNumero(numeroDaConta);
         if (conta.possuiSaldo()) {
