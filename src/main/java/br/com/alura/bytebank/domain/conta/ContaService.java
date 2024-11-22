@@ -2,11 +2,9 @@ package br.com.alura.bytebank.domain.conta;
 
 import br.com.alura.bytebank.ConnectionFactory;
 import br.com.alura.bytebank.domain.RegraDeNegocioException;
-import br.com.alura.bytebank.domain.cliente.Cliente;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
-import java.util.HashSet;
 import java.util.Set;
 
 public class ContaService {
@@ -17,7 +15,6 @@ public class ContaService {
         this.connection = new ConnectionFactory();
     }
 
-    private Set<Conta> contas = new HashSet<>();
 
     public Set<Conta> listarContasAbertas() {
         Connection conn = connection.recuperaConexao();
@@ -42,27 +39,32 @@ public class ContaService {
     public void realizarSaque(Integer numeroDaConta, BigDecimal valor) {
         var conta = listarContaPorNumero(numeroDaConta);
         if (conta == null) {
-            throw new RegraDeNegocioException("Conta não existe!"); }
+            throw new RegraDeNegocioException("Conta não existe!");
+        }
         if (valor.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new RegraDeNegocioException("Valor do saque deve ser superior a zero!"); }
+            throw new RegraDeNegocioException("Valor do saque deve ser superior a zero!");
+        }
         if (valor.compareTo(conta.getSaldo()) > 0) {
-            throw new RegraDeNegocioException("Saldo insuficiente!"); }
+            throw new RegraDeNegocioException("Saldo insuficiente!");
+        }
         BigDecimal novoValor = conta.getSaldo().subtract(valor);
-        alterar(conta.getNumero(), novoValor); }
+        alterar(conta.getNumero(), novoValor);
+    }
 
     public void realizarDeposito(Integer numeroDaConta, BigDecimal valor) {
         var conta = listarContaPorNumero(numeroDaConta);
         if (conta == null) {
-            throw new RegraDeNegocioException("Conta não existe!"); }
+            throw new RegraDeNegocioException("Conta não existe!");
+        }
         if (valor.compareTo(BigDecimal.ZERO) <= 0) {
             throw new RegraDeNegocioException("Valor do deposito deve ser superior a zero!");
         }
 
         BigDecimal novoValor = conta.getSaldo().add(valor);
-        alterar(conta.getNumero(),novoValor);
+        alterar(conta.getNumero(), novoValor);
     }
 
-    public void realizarTransferencia (Integer numeroDaContaOrigem, Integer numeroDaContaDestino, BigDecimal valor){
+    public void realizarTransferencia(Integer numeroDaContaOrigem, Integer numeroDaContaDestino, BigDecimal valor) {
         var contaOrigem = listarContaPorNumero(numeroDaContaOrigem);
         var contaDestino = listarContaPorNumero(numeroDaContaDestino);
 
@@ -76,12 +78,15 @@ public class ContaService {
     public void encerrar(Integer numeroDaConta) {
         var conta = listarContaPorNumero(numeroDaConta);
         if (conta == null) {
-            throw new RegraDeNegocioException("Conta não existe!"); }
+            throw new RegraDeNegocioException("Conta não existe!");
+        }
         if (conta.possuiSaldo()) {
             throw new RegraDeNegocioException("Conta não pode ser encerrada pois ainda possui saldo!");
         }
 
-        contas.remove(conta);
+        Connection conn = connection.recuperaConexao();
+
+        new ContaDAO(conn).deletar(numeroDaConta);
     }
 
     private void alterar(Integer numero, BigDecimal novoValor) {

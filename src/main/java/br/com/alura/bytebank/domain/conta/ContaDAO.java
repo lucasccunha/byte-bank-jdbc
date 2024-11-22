@@ -27,15 +27,14 @@ public class ContaDAO {
         String sql = "INSERT INTO conta (numero, saldo, cliente_nome, cliente_cpf,cliente_email)" + "VALUES (?, ?, ?, ?, ?)";
 
 
-
         try {
             PreparedStatement preparedStatement = conn.prepareStatement(sql);
 
-            preparedStatement.setInt(1,conta.getNumero());
+            preparedStatement.setInt(1, conta.getNumero());
             preparedStatement.setBigDecimal(2, BigDecimal.ZERO);
             preparedStatement.setString(3, dadosDaConta.dadosCliente().nome());
-            preparedStatement.setString(4,dadosDaConta.dadosCliente().cpf());
-            preparedStatement.setString(5,dadosDaConta.dadosCliente().email());
+            preparedStatement.setString(4, dadosDaConta.dadosCliente().cpf());
+            preparedStatement.setString(5, dadosDaConta.dadosCliente().email());
 
             preparedStatement.execute();
             preparedStatement.close();
@@ -62,7 +61,7 @@ public class ContaDAO {
                         new DadosCadastroCliente(nome, cpf, email);
                 Cliente cliente = new Cliente(dadosCliente);
 
-                contas.add(new Conta(numero,saldo, cliente));
+                contas.add(new Conta(numero, saldo, cliente));
             }
 
         } catch (SQLException e) {
@@ -86,7 +85,7 @@ public class ContaDAO {
                     String email = rs.getString(5);
                     DadosCadastroCliente dadosCliente = new DadosCadastroCliente(nome, cpf, email);
                     Cliente cliente = new Cliente(dadosCliente);
-                    return new Conta(numeroRecuperado,saldo, cliente);
+                    return new Conta(numeroRecuperado, saldo, cliente);
                 } else {
                     throw new RegraDeNegocioException("Não existe conta cadastrada com esse número!");
                 }
@@ -118,6 +117,21 @@ public class ContaDAO {
             } catch (SQLException ex) {
                 throw new RuntimeException(ex);
             }
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void deletar(Integer numeroDaConta) {
+        String sql = "DELETE FROM conta WHERE numero = ?";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+
+            ps.setInt(1, numeroDaConta);
+
+            ps.execute();
+            ps.close();
+            conn.close();
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
